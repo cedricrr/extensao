@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "SEI - Ordenar Marcadores Fornecedores",
+  "version": "1.0",
+  "description": "Reordena os processos marcados com a etiqueta 'Fornecedores' em ordem cronológica pela data 'Até DD/MM/AAAA'.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "sei-ordenar-fornecedores@cedricrr",
+      "strict_min_version": "109.0"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://sei.mprr.mp.br/*controlador.php*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
