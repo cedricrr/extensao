@@ -11,10 +11,14 @@
     return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
   }
 
+  function ehMarcadorAlvo(anc) {
+    return anc.textContent.trim().toLowerCase().startsWith(NOME_MARCADOR.toLowerCase());
+  }
+
   function dataDoMarcador(tr) {
     const marcadores = tr.querySelectorAll('a.ancMarcador');
     for (const anc of marcadores) {
-      if (anc.textContent.trim() === NOME_MARCADOR) {
+      if (ehMarcadorAlvo(anc)) {
         const data = extrairData(anc.getAttribute('aria-label'));
         if (data) return data;
       }
