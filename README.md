@@ -28,13 +28,37 @@ Na tela **Controle de Processos** do SEI, os processos são listados na ordem em
 3. Clique em **Carregar sem compactação**
 4. Selecione a pasta raiz do projeto (`sei-auto-prazo/`)
 
-### Firefox
+### Firefox (instalação permanente — recomendado)
+
+1. Baixe o arquivo `.xpi` disponível na seção [Releases](../../releases) do repositório
+2. No Firefox, abra o arquivo `.xpi` (**Arquivo → Abrir** ou arraste para a janela)
+3. Confirme a instalação na caixa de diálogo
+
+A extensão fica instalada permanentemente, inclusive após reiniciar o navegador.
+
+### Firefox (temporário — apenas para testes)
 
 1. Acesse `about:debugging#/runtime/this-firefox`
 2. Clique em **Carregar extensão temporária**
 3. Selecione o arquivo `mozilla/manifest.json`
 
-> **Nota:** No Firefox, a extensão temporária é removida ao fechar o navegador. Para instalação permanente, é necessário assinar a extensão via [addons.mozilla.org](https://addons.mozilla.org).
+> A extensão temporária é removida ao fechar o navegador.
+
+### Como gerar um novo .xpi assinado (mantenedor)
+
+Requer conta no [addons.mozilla.org](https://addons.mozilla.org) com chave de API gerada em **Ferramentas → Gerenciar chaves de API**.
+
+```bash
+npm install -g web-ext
+
+web-ext sign \
+  --source-dir mozilla/ \
+  --api-key=<JWT_issuer> \
+  --api-secret=<JWT_secret> \
+  --channel=unlisted
+```
+
+O `.xpi` assinado é gerado em `web-ext-artifacts/`.
 
 ## URL de atuação
 
