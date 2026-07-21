@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const NOME_MARCADOR = 'Fornecedor';
   const REGEX_DATA = /Até\s+(\d{2})\/(\d{2})\/(\d{4})/i;
 
   function extrairData(ariaLabel) {
@@ -11,17 +10,10 @@
     return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
   }
 
-  function ehMarcadorAlvo(anc) {
-    return anc.textContent.trim().toLowerCase().startsWith(NOME_MARCADOR.toLowerCase());
-  }
-
   function dataDoMarcador(tr) {
-    const marcadores = tr.querySelectorAll('a.ancMarcador');
-    for (const anc of marcadores) {
-      if (ehMarcadorAlvo(anc)) {
-        const data = extrairData(anc.getAttribute('aria-label'));
-        if (data) return data;
-      }
+    for (const anc of tr.querySelectorAll('a.ancMarcador')) {
+      const data = extrairData(anc.getAttribute('aria-label'));
+      if (data) return data;
     }
     return null;
   }
@@ -32,7 +24,6 @@
 
     const tbody = tabela.tBodies[0];
 
-    // Coleta as linhas com marcador "Fornecedor" na ordem em que aparecem.
     const alvo = [];
     for (const tr of Array.from(tbody.rows)) {
       const data = dataDoMarcador(tr);
@@ -40,19 +31,15 @@
     }
     if (alvo.length < 2) return;
 
-    // Substitui cada linha por um comentário-placeholder fixo no DOM,
-    // garantindo que as posições originais dos slots fiquem preservadas.
     const placeholders = alvo.map(({ tr }) => {
-      const ph = document.createComment('slot-fornecedor');
+      const ph = document.createComment('slot-prazo');
       tbody.insertBefore(ph, tr);
       tbody.removeChild(tr);
       return ph;
     });
 
-    // Ordena as linhas por data crescente (mais antiga → mais recente).
     const ordenadas = alvo.slice().sort((a, b) => a.data - b.data);
 
-    // Cada placeholder recebe a linha ordenada correspondente.
     placeholders.forEach((ph, i) => {
       tbody.replaceChild(ordenadas[i].tr, ph);
     });
@@ -60,11 +47,11 @@
 
   function inserirBotao() {
     const alvo = document.querySelector('h1') && document.querySelector('h1').parentElement;
-    if (!alvo || document.getElementById('btnOrdenarFornecedores')) return;
+    if (!alvo || document.getElementById('btnOrdenarPorPrazo')) return;
 
     const botao = document.createElement('button');
-    botao.id = 'btnOrdenarFornecedores';
-    botao.textContent = 'Ordenar "Fornecedores" por data';
+    botao.id = 'btnOrdenarPorPrazo';
+    botao.textContent = 'Ordenar por prazo "Até"';
     botao.style.margin = '8px 0';
     botao.style.cursor = 'pointer';
     botao.addEventListener('click', ordenarTabela);

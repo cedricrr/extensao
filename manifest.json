@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "SEI - Ordenar Marcadores Fornecedores",
-  "version": "1.0",
-  "description": "Reordena os processos marcados com a etiqueta 'Fornecedores' em ordem cronológica pela data 'Até DD/MM/AAAA'.",
+  "name": "SEI - Ordenar por Prazo",
+  "version": "1.1",
+  "description": "Reordena os processos com marcadores de prazo ('Até DD/MM/AAAA') em ordem cronológica crescente.",
   "content_scripts": [
     {
       "matches": ["https://sei.mprr.mp.br/*controlador.php*"],
