@@ -78,3 +78,66 @@ sei-auto-prazo/
     ├── manifest.json    # Manifesto para Firefox
     └── content.js       # Script de conteúdo para Firefox
 ```
+
+---
+
+# PROJUDI — Painel de Saúde (Dashboard)
+
+Extensão de navegador que transforma o endpoint de monitoramento de saúde do PROJUDI —
+que o navegador exibe como **JSON cru** — em um **dashboard legível**, com atualização
+automática.
+
+Endpoint alvo:
+
+```
+https://projudi.tjrr.jus.br/projudi/rest/monitoring/health
+```
+
+## O que o painel mostra
+
+- **Status geral** em destaque (Operacional / Degradado / Indisponível), sempre com
+  ícone **e** rótulo (a cor nunca carrega o significado sozinha). O cabeçalho reflete o
+  **pior** componente — não exibe "Operacional" se algum item caiu.
+- **Resumo** com a contagem de componentes por estado.
+- **Cards por componente** (banco de dados, disco, memória, conectividade, e-mail, etc.),
+  com badge de status e os detalhes formatados de forma amigável:
+  - bytes viram `GB`/`MB`, durações viram `2h 15min`, datas ficam no formato brasileiro,
+    booleanos viram `Sim`/`Não`;
+  - pares *total/livre* ou *total/usado* viram uma **barra de utilização** com o percentual.
+- **Ver JSON bruto** — bloco colapsável com o payload original, para quando precisar do dado exato.
+- **Atualização automática** (10s / 30s / 60s / 120s) com botão para atualizar na hora.
+
+O renderizador é **tolerante a esquema**: funciona com o formato Spring Actuator
+(`status` + `components` + `details`) e também com estruturas genéricas de chave/valor.
+Ajuste fino de rótulos e unidades é trivial assim que uma amostra real do JSON estiver disponível.
+
+## Preview sem instalar
+
+Abra `projudi-health/preview.html` no navegador. Ele já vem com dados de exemplo e
+oferece **Colar JSON** (para renderizar um retorno real) e **Buscar do endpoint**
+(sujeito a bloqueio de CORS quando aberto fora da extensão).
+
+> Capturas de tela: `projudi-health/preview-light.png` e `projudi-health/preview-dark.png`.
+
+## Instalação
+
+### Chrome / Edge
+1. Acesse `chrome://extensions/`
+2. Ative o **Modo do desenvolvedor**
+3. **Carregar sem compactação** → selecione a pasta `projudi-health/`
+
+### Firefox (temporário)
+1. Acesse `about:debugging#/runtime/this-firefox`
+2. **Carregar extensão temporária** → selecione `projudi-health/mozilla/manifest.json`
+
+## Estrutura
+
+```
+projudi-health/
+├── manifest.json         # Manifesto Chrome/Edge (MV3)
+├── content.js            # Lê o JSON da página e monta a barra + auto-refresh
+├── health-dashboard.js   # Renderizador tolerante a esquema (reutilizável)
+├── dashboard.css         # Estilos do painel (claro/escuro automático)
+├── preview.html          # Preview standalone (dados de exemplo / colar JSON)
+└── mozilla/              # Cópia dos arquivos + manifesto para Firefox
+```

@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "PROJUDI - Painel de Saúde",
+  "version": "1.0",
+  "description": "Transforma o endpoint de monitoramento de saúde do PROJUDI (JSON cru) em um dashboard legível, com atualização automática.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "projudi-health-dashboard@extensao",
+      "strict_min_version": "115.0"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://projudi.tjrr.jus.br/projudi/rest/monitoring/health*"],
+      "js": ["health-dashboard.js", "content.js"],
+      "css": ["dashboard.css"],
+      "run_at": "document_end"
+    }
+  ]
+}

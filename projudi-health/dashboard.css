@@ -1,0 +1,227 @@
+/*
+ * Estilos do painel de saúde do PROJUDI.
+ * Tokens de status e cores seguem a paleta validada (ícone + rótulo sempre
+ * acompanham a cor — a cor nunca carrega significado sozinha).
+ * Suporta modo claro/escuro automático (prefers-color-scheme).
+ */
+
+.hd-root {
+  /* superfícies e tinta */
+  --hd-plane:      #f9f9f7;
+  --hd-surface:    #fcfcfb;
+  --hd-ink:        #0b0b0b;
+  --hd-ink-2:      #52514e;
+  --hd-muted:      #898781;
+  --hd-line:       #e1e0d9;
+  --hd-border:     rgba(11, 11, 11, 0.10);
+
+  /* status (fixos, nunca tematizados) */
+  --hd-good:       #0ca30c;
+  --hd-warning:    #fab219;
+  --hd-critical:   #d03b3b;
+  --hd-unknown:    #898781;
+  --hd-good-soft:     rgba(12, 163, 12, 0.12);
+  --hd-warning-soft:  rgba(250, 178, 25, 0.16);
+  --hd-critical-soft: rgba(208, 59, 59, 0.12);
+  --hd-unknown-soft:  rgba(137, 135, 129, 0.14);
+
+  --hd-accent:     #2a78d6;
+
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 56px;
+  color: var(--hd-ink);
+  background: var(--hd-plane);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.hd-root *, .hd-root *::before, .hd-root *::after { box-sizing: border-box; }
+
+@media (prefers-color-scheme: dark) {
+  .hd-root {
+    --hd-plane:   #0d0d0d;
+    --hd-surface: #1a1a19;
+    --hd-ink:     #ffffff;
+    --hd-ink-2:   #c3c2b7;
+    --hd-muted:   #898781;
+    --hd-line:    #2c2c2a;
+    --hd-border:  rgba(255, 255, 255, 0.10);
+    --hd-good:    #0ca30c;
+    --hd-warning: #fab219;
+    --hd-critical:#e05656;
+    --hd-accent:  #3987e5;
+  }
+}
+
+/* utilidades de status */
+.hd-good    { --hd-c: var(--hd-good);    --hd-c-soft: var(--hd-good-soft); }
+.hd-warning { --hd-c: var(--hd-warning); --hd-c-soft: var(--hd-warning-soft); }
+.hd-critical{ --hd-c: var(--hd-critical);--hd-c-soft: var(--hd-critical-soft); }
+.hd-unknown { --hd-c: var(--hd-unknown); --hd-c-soft: var(--hd-unknown-soft); }
+
+.hd-mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+/* ---------- Hero ---------- */
+.hd-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 32px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 22px 24px;
+  border: 1px solid var(--hd-border);
+  border-left: 4px solid var(--hd-c, var(--hd-unknown));
+  border-radius: 14px;
+  background: var(--hd-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.hd-hero-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hd-muted);
+}
+.hd-hero-statusline { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.hd-hero-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--hd-c, var(--hd-unknown));
+  box-shadow: 0 0 0 4px var(--hd-c-soft, transparent);
+  flex: none;
+}
+.hd-hero-status { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.hd-hero-sub { margin-top: 6px; color: var(--hd-ink-2); font-size: 13px; }
+
+.hd-hero-meta { display: grid; gap: 6px; min-width: 220px; }
+.hd-hero-meta-row { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; }
+.hd-hero-meta-k { color: var(--hd-muted); }
+.hd-hero-meta-v { color: var(--hd-ink-2); text-align: right; word-break: break-all; }
+
+/* ---------- Resumo (stat tiles) ---------- */
+.hd-summary { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0 4px; }
+.hd-summary-tile {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 18px;
+  min-width: 120px;
+  border: 1px solid var(--hd-border);
+  border-radius: 12px;
+  background: var(--hd-surface);
+  border-top: 3px solid var(--hd-c, var(--hd-unknown));
+}
+.hd-summary-num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hd-summary-lbl { font-size: 12px; color: var(--hd-ink-2); }
+
+/* ---------- Grade de componentes ---------- */
+.hd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.hd-card {
+  padding: 16px 18px;
+  border: 1px solid var(--hd-border);
+  border-radius: 12px;
+  background: var(--hd-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.hd-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.hd-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--hd-c, var(--hd-unknown)); flex: none;
+}
+.hd-card-title { flex: 1; margin: 0; font-size: 15px; font-weight: 600; }
+
+.hd-badge {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  color: var(--hd-c, var(--hd-unknown));
+  background: var(--hd-c-soft, transparent);
+  white-space: nowrap;
+}
+.hd-badge-icon { font-weight: 700; }
+
+/* ---------- Barra de utilização ---------- */
+.hd-meter { margin: 12px 0 4px; }
+.hd-meter-track {
+  height: 8px; border-radius: 999px; overflow: hidden;
+  background: var(--hd-line);
+}
+.hd-meter-fill { height: 100%; border-radius: 999px; background: var(--hd-c, var(--hd-accent)); transition: width .3s ease; }
+.hd-meter-legend { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; }
+.hd-meter-pct { font-weight: 600; }
+.hd-meter-abs { color: var(--hd-muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- Lista de detalhes ---------- */
+.hd-details { margin: 10px 0 0; display: grid; gap: 0; }
+.hd-detail-row {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 6px 0;
+  border-top: 1px solid var(--hd-line);
+  font-size: 13px;
+}
+.hd-detail-row:first-child { border-top: none; }
+.hd-detail-key { color: var(--hd-muted); }
+.hd-detail-val { margin: 0; color: var(--hd-ink); text-align: right; word-break: break-word; font-variant-numeric: tabular-nums; }
+.hd-detail-val .hd-details { margin-top: 4px; }
+
+.hd-subgrid { display: grid; gap: 10px; margin-top: 12px; }
+.hd-subgrid .hd-card { background: var(--hd-plane); }
+
+/* ---------- JSON bruto ---------- */
+.hd-raw { margin-top: 22px; border: 1px solid var(--hd-border); border-radius: 12px; background: var(--hd-surface); }
+.hd-raw-summary { padding: 12px 16px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--hd-ink-2); user-select: none; }
+.hd-raw-pre {
+  margin: 0; padding: 0 16px 16px;
+  overflow-x: auto; max-height: 420px; overflow-y: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px; line-height: 1.5; color: var(--hd-ink-2);
+}
+
+.hd-foot { margin-top: 22px; text-align: center; font-size: 12px; color: var(--hd-muted); }
+
+/* ---------- Barra de ferramentas da extensão ---------- */
+.hdx-toolbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 20px;
+  background: rgba(252, 252, 251, 0.92);
+  border-bottom: 1px solid rgba(11, 11, 11, 0.10);
+  backdrop-filter: saturate(180%) blur(8px);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.hdx-toolbar-title { font-size: 14px; font-weight: 700; color: #0b0b0b; letter-spacing: -0.01em; }
+.hdx-toolbar-controls { display: flex; align-items: center; gap: 8px; }
+.hdx-btn, .hdx-select {
+  font: inherit; font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid rgba(11, 11, 11, 0.15);
+  border-radius: 8px;
+  background: #fff; color: #0b0b0b;
+  cursor: pointer;
+}
+.hdx-btn:hover, .hdx-select:hover { border-color: rgba(11, 11, 11, 0.3); }
+.hdx-btn-toggle.hdx-on { color: #0ca30c; border-color: rgba(12, 163, 12, 0.4); background: rgba(12, 163, 12, 0.08); font-weight: 600; }
+.hdx-erro {
+  margin: 24px auto; max-width: 640px;
+  padding: 16px 18px;
+  border: 1px solid rgba(208, 59, 59, 0.4);
+  border-left: 4px solid #d03b3b;
+  border-radius: 12px;
+  background: rgba(208, 59, 59, 0.08);
+  color: #0b0b0b;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hdx-toolbar { background: rgba(26, 26, 25, 0.92); border-bottom-color: rgba(255, 255, 255, 0.10); }
+  .hdx-toolbar-title { color: #fff; }
+  .hdx-btn, .hdx-select { background: #1a1a19; color: #fff; border-color: rgba(255, 255, 255, 0.18); }
+  .hdx-erro { color: #fff; }
+}

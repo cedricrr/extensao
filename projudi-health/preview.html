@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PROJUDI · Painel de Saúde — Preview</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    body { margin: 0; background: #f9f9f7; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    @media (prefers-color-scheme: dark) { body { background: #0d0d0d; color: #fff; } }
+    .pv-bar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      max-width: 1100px; margin: 0 auto; padding: 16px 20px 0;
+    }
+    .pv-bar h1 { font-size: 15px; margin: 0 auto 0 0; font-weight: 700; }
+    .pv-bar button {
+      font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px;
+      border: 1px solid rgba(11,11,11,.15); background: #fff; cursor: pointer;
+    }
+    @media (prefers-color-scheme: dark) { .pv-bar button { background:#1a1a19; color:#fff; border-color:rgba(255,255,255,.18);} }
+    .pv-paste { max-width: 1100px; margin: 10px auto 0; padding: 0 20px; display: none; }
+    .pv-paste textarea {
+      width: 100%; min-height: 140px; box-sizing: border-box; padding: 10px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+      border: 1px solid rgba(11,11,11,.15); border-radius: 8px; resize: vertical;
+    }
+  </style>
+</head>
+<body>
+  <div class="pv-bar">
+    <h1>PROJUDI · Painel de Saúde <span style="color:#898781;font-weight:400">— preview</span></h1>
+    <button id="pv-sample">Dados de exemplo</button>
+    <button id="pv-fetch">Buscar do endpoint</button>
+    <button id="pv-paste-toggle">Colar JSON</button>
+  </div>
+  <div class="pv-paste" id="pv-paste">
+    <textarea id="pv-json" placeholder="Cole aqui o JSON retornado por /projudi/rest/monitoring/health e clique em Renderizar"></textarea>
+    <div style="margin:8px 0"><button id="pv-render">Renderizar</button></div>
+  </div>
+
+  <div id="dashboard"></div>
+
+  <script src="health-dashboard.js"></script>
+  <script>
+    const ENDPOINT = 'https://projudi.tjrr.jus.br/projudi/rest/monitoring/health';
+    const alvo = document.getElementById('dashboard');
+
+    // Exemplo realista no formato Spring Actuator (ajuste-se ao real quando disponível).
+    const EXEMPLO = {
+      status: 'UP',
+      timestamp: '2026-07-23T11:42:07',
+      components: {
+        db: { status: 'UP', details: { database: 'PostgreSQL', validationQuery: 'SELECT 1', active: 12, idle: 8, max: 50 } },
+        diskSpace: { status: 'UP', details: { total: 536870912000, free: 96636764160, threshold: 10485760 } },
+        memory: { status: 'WARNING', details: { used: 6871947673, max: 8589934592 } },
+        ping: { status: 'UP' },
+        mail: { status: 'DOWN', details: { location: 'smtp.tjrr.jus.br:25', error: 'Connection timed out' } }
+      }
+    };
+
+    function render(dados, endpoint) {
+      HealthDashboard.render(alvo, dados, { endpoint: endpoint || ENDPOINT, atualizadoEm: new Date() });
+    }
+
+    document.getElementById('pv-sample').addEventListener('click', () => render(EXEMPLO));
+    document.getElementById('pv-paste-toggle').addEventListener('click', () => {
+      const p = document.getElementById('pv-paste');
+      p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    });
+    document.getElementById('pv-render').addEventListener('click', () => {
+      try { render(JSON.parse(document.getElementById('pv-json').value), ENDPOINT); }
+      catch (e) { alert('JSON inválido: ' + e.message); }
+    });
+    document.getElementById('pv-fetch').addEventListener('click', async () => {
+      try {
+        const r = await fetch(ENDPOINT, { headers: { Accept: 'application/json' } });
+        render(await r.json(), ENDPOINT);
+      } catch (e) {
+        alert('Não foi possível buscar do endpoint direto do navegador (provável bloqueio CORS). '
+          + 'Use a extensão para leitura ao vivo, ou cole o JSON manualmente.\n\n' + e.message);
+      }
+    });
+
+    render(EXEMPLO);
+  </script>
+</body>
+</html>
