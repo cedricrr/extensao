@@ -45,17 +45,16 @@
     const ENDPOINT = 'https://projudi.tjrr.jus.br/projudi/rest/monitoring/health';
     const alvo = document.getElementById('dashboard');
 
-    // Exemplo realista no formato Spring Actuator (ajuste-se ao real quando disponível).
+    // Formato real do endpoint de health do PROJUDI (array de verificações).
     const EXEMPLO = {
-      status: 'UP',
-      timestamp: '2026-07-23T11:42:07',
-      components: {
-        db: { status: 'UP', details: { database: 'PostgreSQL', validationQuery: 'SELECT 1', active: 12, idle: 8, max: 50 } },
-        diskSpace: { status: 'UP', details: { total: 536870912000, free: 96636764160, threshold: 10485760 } },
-        memory: { status: 'WARNING', details: { used: 6871947673, max: 8589934592 } },
-        ping: { status: 'UP' },
-        mail: { status: 'DOWN', details: { location: 'smtp.tjrr.jus.br:25', error: 'Connection timed out' } }
-      }
+      healthMonitorResult: [
+        { durationMillis: '1', message: '', status: 'SUCCESS', test: 'checkMasterDB', timestamp: '23/07/2026 10:36:51.546' },
+        { durationMillis: '8', message: '', status: 'SUCCESS', test: 'checkConsultaDB', timestamp: '23/07/2026 10:36:51.547' },
+        { durationMillis: '24', message: '', status: 'SUCCESS', test: 'checkEstatisticaDB', timestamp: '23/07/2026 10:36:51.555' },
+        { durationMillis: '30', message: '', status: 'SUCCESS', test: 'checkFileSystemRW', timestamp: '23/07/2026 10:36:51.579' },
+        { durationMillis: '0', message: 'SNU', status: 'SUCCESS', test: 'checkInternalWebServices', timestamp: '23/07/2026 10:36:51.609' },
+        { durationMillis: '1544', message: 'OAB CNA', status: 'SUCCESS', test: 'checkExternalWebServices', timestamp: '23/07/2026 10:36:51.609' }
+      ]
     };
 
     function render(dados, endpoint) {

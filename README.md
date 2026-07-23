@@ -99,11 +99,19 @@ https://projudi.tjrr.jus.br/projudi/rest/monitoring/health
   ícone **e** rótulo (a cor nunca carrega o significado sozinha). O cabeçalho reflete o
   **pior** componente — não exibe "Operacional" se algum item caiu.
 - **Resumo** com a contagem de componentes por estado.
-- **Cards por componente** (banco de dados, disco, memória, conectividade, e-mail, etc.),
-  com badge de status e os detalhes formatados de forma amigável:
-  - bytes viram `GB`/`MB`, durações viram `2h 15min`, datas ficam no formato brasileiro,
-    booleanos viram `Sim`/`Não`;
-  - pares *total/livre* ou *total/usado* viram uma **barra de utilização** com o percentual.
+- **Cards por verificação**, com badge de status e detalhes formatados de forma amigável.
+  O endpoint do PROJUDI retorna um array `healthMonitorResult` de checagens; cada uma
+  vira um card com rótulo em português:
+  - `checkMasterDB` → Banco de dados (Master)
+  - `checkConsultaDB` → Banco de dados (Consulta)
+  - `checkEstatisticaDB` → Banco de dados (Estatística)
+  - `checkFileSystemRW` → Sistema de arquivos (leitura/escrita)
+  - `checkInternalWebServices` → Web services internos
+  - `checkExternalWebServices` → Web services externos
+- **Formatação amigável** dos campos: `durationMillis` vira *tempo de resposta*
+  (`30 ms`, `1,54 s`), o `timestamp` aparece como *verificado em*, e a `message` só é
+  exibida quando tem conteúdo (ex.: `SNU`, `OAB CNA`). Para outros formatos, bytes viram
+  `GB`/`MB`, booleanos viram `Sim`/`Não` e pares *total/livre* viram barra de utilização.
 - **Ver JSON bruto** — bloco colapsável com o payload original, para quando precisar do dado exato.
 - **Atualização automática** (10s / 30s / 60s / 120s) com botão para atualizar na hora.
 

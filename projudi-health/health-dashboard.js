@@ -23,9 +23,9 @@
 
   // Mapeia os muitos rótulos possíveis de status para 4 estados canônicos.
   // Estados: 'good' | 'warning' | 'critical' | 'unknown'
-  const STATUS_BOM = new Set(['up', 'ok', 'healthy', 'alive', 'online', 'running', 'ready', 'pass', 'passing', 'true', 'green', 'success', '200']);
-  const STATUS_ALERTA = new Set(['warn', 'warning', 'degraded', 'out_of_service', 'partial', 'yellow', 'slow', 'maintenance']);
-  const STATUS_CRITICO = new Set(['down', 'error', 'fail', 'failed', 'failing', 'dead', 'offline', 'unhealthy', 'false', 'red', 'critical', 'unavailable', '500', '503']);
+  const STATUS_BOM = new Set(['up', 'ok', 'healthy', 'alive', 'online', 'running', 'ready', 'pass', 'passing', 'true', 'green', 'success', 'sucesso', 'ativo', '200']);
+  const STATUS_ALERTA = new Set(['warn', 'warning', 'degraded', 'out_of_service', 'partial', 'yellow', 'slow', 'lento', 'maintenance', 'manutencao', 'manutenção', 'alerta']);
+  const STATUS_CRITICO = new Set(['down', 'error', 'erro', 'fail', 'failure', 'failed', 'failing', 'falha', 'dead', 'offline', 'unhealthy', 'timeout', 'false', 'red', 'critical', 'unavailable', 'indisponivel', 'indisponível', '500', '503']);
 
   function normalizarStatus(valor) {
     if (valor === true) return 'good';
@@ -84,6 +84,7 @@
   function formatarDuracao(ms) {
     if (typeof ms !== 'number' || !isFinite(ms)) return String(ms);
     if (ms < 1000) return `${Math.round(ms)} ms`;
+    if (ms < 60000) return `${(ms / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} s`;
     let s = Math.floor(ms / 1000);
     const d = Math.floor(s / 86400); s -= d * 86400;
     const h = Math.floor(s / 3600);  s -= h * 3600;
@@ -136,8 +137,16 @@
       memory: 'Memória', heap: 'Memória (heap)', cpu: 'CPU', redis: 'Redis',
       total: 'Total', free: 'Livre', used: 'Usado', threshold: 'Limite',
       validationquery: 'Query de validação', version: 'Versão', uptime: 'Tempo no ar',
-      timestamp: 'Momento', hostname: 'Servidor', host: 'Servidor', port: 'Porta',
+      timestamp: 'Verificado em', hostname: 'Servidor', host: 'Servidor', port: 'Porta',
       active: 'Ativas', idle: 'Ociosas', max: 'Máximo', responsetime: 'Tempo de resposta',
+      durationmillis: 'Tempo de resposta', message: 'Mensagem', test: 'Teste',
+      // checagens específicas do endpoint de health do PROJUDI
+      checkmasterdb: 'Banco de dados (Master)',
+      checkconsultadb: 'Banco de dados (Consulta)',
+      checkestatisticadb: 'Banco de dados (Estatística)',
+      checkfilesystemrw: 'Sistema de arquivos (leitura/escrita)',
+      checkinternalwebservices: 'Web services internos',
+      checkexternalwebservices: 'Web services externos',
     };
     const k = String(chave).toLowerCase().replace(/[_\s-]/g, '');
     return dic[k] || String(chave).replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/^./, (c) => c.toUpperCase());
@@ -277,13 +286,48 @@
   // Render principal
   // ---------------------------------------------------------------------------
 
+  // Normaliza os vários formatos possíveis de payload em um mapa de componentes
+  // { nome: { status, details } } e sugere um carimbo de data/hora do servidor.
+  function extrairComponentes(dados) {
+    if (!dados || typeof dados !== 'object') return { componentes: null, carimbo: null };
+
+    // Formato do PROJUDI: array de testes (healthMonitorResult) ou similar.
+    const arr = dados.healthMonitorResult || dados.checks || dados.results || dados.tests
+      || (Array.isArray(dados) ? dados : null);
+    if (Array.isArray(arr)) {
+      const componentes = {};
+      let carimbo = null;
+      arr.forEach((item, i) => {
+        if (!item || typeof item !== 'object') return;
+        let nome = item.test || item.name || item.nome || item.id || `Verificação ${i + 1}`;
+        if (componentes[nome]) nome = `${nome} (${i + 1})`;
+        const details = {};
+        for (const [k, v] of Object.entries(item)) {
+          const kl = k.toLowerCase();
+          if (kl === 'status' || kl === 'test' || kl === 'name' || kl === 'nome') continue;
+          if (kl === 'message' && (v == null || String(v).trim() === '')) continue; // mensagem vazia = ruído
+          if (kl === 'durationmillis') { details[k] = Number(v); continue; } // string → número (ms)
+          details[k] = v;
+        }
+        if (item.timestamp && (!carimbo || String(item.timestamp) > String(carimbo))) carimbo = item.timestamp;
+        componentes[nome] = { status: item.status, details };
+      });
+      return { componentes, carimbo };
+    }
+
+    // Formato Spring Actuator ou objeto de componentes.
+    const obj = dados.components || dados.componentes || (dados.checks && !Array.isArray(dados.checks) ? dados.checks : null);
+    return { componentes: obj || null, carimbo: null };
+  }
+
   function render(container, dados, meta) {
     meta = meta || {};
     container.textContent = '';
     container.classList.add('hd-root');
 
     // Descobre componentes e status geral
-    const componentes = (dados && (dados.components || dados.componentes || dados.checks || dados.details)) || null;
+    const extraido = extrairComponentes(dados);
+    const componentes = extraido.componentes;
     const estadoReportado = normalizarStatus(statusBruto(dados));
     // Estado geral = o pior entre o reportado no topo e o pior componente.
     // Um painel de monitoramento não deve exibir "Operacional" se algo caiu.
@@ -326,7 +370,7 @@
       linha.appendChild(el('span', 'hd-hero-meta-v hd-mono', meta.endpoint));
       heroMeta.appendChild(linha);
     }
-    const carimbo = dados && (dados.timestamp || dados.time || dados.datetime || dados.data);
+    const carimbo = (dados && (dados.timestamp || dados.time || dados.datetime || dados.data)) || extraido.carimbo;
     if (carimbo) {
       const linha = el('div', 'hd-hero-meta-row');
       linha.appendChild(el('span', 'hd-hero-meta-k', 'Servidor informou'));
